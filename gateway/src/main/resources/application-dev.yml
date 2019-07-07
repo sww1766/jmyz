@@ -1,0 +1,73 @@
+spring:
+  application:
+    name: gateway-sww
+  cloud:
+    gateway:
+      enabled: true
+      routes:
+        #账号
+        - id: authcenter
+          uri: lb://AUTHCENTERSERVICE-SWW
+          predicates:
+            - Path=/authcenter/**
+          filters:
+            - StripPrefix=1
+        #订单
+        - id: order
+          uri: lb://ORDERSERVICE-SWW
+          predicates:
+            - Path=/order/**
+          filters:
+            - StripPrefix=1
+      discovery:
+        locator:
+          enabled: true
+  redis:
+    database: 0
+    host: redisw.dj.com
+    port: 6379
+    jedis:
+      pool:
+        max-active: 100
+        max-idle: 8
+        max-wait: -1
+        min-idle: 0
+        password: "dianjue"
+  datasource:
+    url: jdbc:mysql://mysql.dj.com:24801/sso?useUnicode=true&useSSL=false&characterEncoding=utf-8
+    username: appuser
+    password: Ctm56@Long
+    driver-class-name: com.mysql.jdbc.Driver
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 50MB
+      enabled: true
+      resolve-lazily: false
+
+swagger:
+  base-package: com.dianjue
+server:
+  port: 1411
+
+
+eureka:
+  instance:
+    hostname: ${eureka.instance.ip-address}
+    prefer-ip-address: true
+    ip-address: 192.168.1.78
+    lease-renewal-interval-in-seconds: 5
+    lease-expiration-duration-in-seconds: 15
+  client:
+    service-url:
+      defaultZone: http://${eureka.instance.hostname}:1001/eureka/,http://${eureka.instance.hostname}:1002/eureka/,http://${eureka.instance.hostname}:1003/eureka/
+hystrix:
+  metrics:
+    enabled: true
+management:
+  endpoints:
+    web.exposure.include: "*"
+  endpoint:
+    health:
+      show-details: ALWAYS
+

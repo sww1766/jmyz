@@ -1,0 +1,6 @@
+server:
+  port: 5013
+
+spring:
+  application:
+    name: eureka

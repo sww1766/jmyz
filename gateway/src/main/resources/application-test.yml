@@ -1,0 +1,119 @@
+spring:
+  application:
+    name: gateway
+  cloud:
+    gateway:
+      enabled: true
+      routes:
+        #账号
+        - id: authcenter
+          uri: lb://AUTHCENTERSERVICE
+          predicates:
+            - Path=/authcenter/**
+          filters:
+            - StripPrefix=1
+        #公用模块
+        - id: commonservice
+          uri: lb://COMMONSERVICE
+          predicates:
+            - Path=/common/**
+          filters:
+            - StripPrefix=1
+        # 字典
+        - id: libraryservice
+          uri: lb://LIBRARYSERVICE
+          predicates:
+            - Path=/libraries/**
+          filters:
+            - StripPrefix=1
+        #资源
+        - id: datum
+          uri: lb://DATUMSERVICE
+          predicates:
+            - Path=/datum/**
+          filters:
+            - StripPrefix=1
+        #订单
+        - id: order
+          uri: lb://ORDERSERVICE
+          predicates:
+            - Path=/order/**
+          filters:
+            - StripPrefix=1
+        #财务
+        - id: finance
+          uri: lb://FINANCESERVICE
+          predicates:
+            - Path=/finance/**
+          filters:
+            - StripPrefix=1
+        #结算
+        - id: settle
+          uri: lb://SETTLEMENTSERVICE
+          predicates:
+            - Path=/settle/**
+          filters:
+            - StripPrefix=1
+        # 日志
+        - id: logbase
+          uri: lb://LOGBASESERVICE
+          predicates:
+            - Path=/logbase/**
+          filters:
+            - StripPrefix=1
+        # 平台
+        - id: platform
+          uri: lb://PLATFORMSERVICE
+          predicates:
+            - Path=/platform/**
+          filters:
+            - StripPrefix=1
+        # 导入导出
+        - id: dataio
+          uri: lb://DATAIOSERVICE
+          predicates:
+            - Path=/dataio/**
+          filters:
+            - StripPrefix=1
+      discovery:
+        locator:
+          enabled: true
+  redis:
+    database: 0
+    host: redisw.dj.com
+    port: 6379
+    jedis:
+      pool:
+        max-active: 100
+        max-idle: 8
+        max-wait: -1
+        min-idle: 0
+        password: "dianjue"
+  datasource:
+    url: jdbc:mysql://mysql.dj.com:24801/sso?useUnicode=true&useSSL=false&characterEncoding=utf-8
+    username: appuser
+    password: Ctm56@Long
+    driver-class-name: com.mysql.jdbc.Driver
+swagger:
+  base-package: com.dianjue
+server:
+  port: 1101
+eureka:
+  instance:
+    hostname: ${eureka.instance.ip-address}
+    prefer-ip-address: true
+    ip-address: 192.168.1.78
+    lease-renewal-interval-in-seconds: 5
+    lease-expiration-duration-in-seconds: 15
+  client:
+    service-url:
+      defaultZone: http://${eureka.instance.hostname}:1001/eureka/,http://${eureka.instance.hostname}:1002/eureka/,http://${eureka.instance.hostname}:1003/eureka/
+hystrix:
+  metrics:
+    enabled: true
+management:
+  endpoints:
+    web.exposure.include: "*"
+  endpoint:
+    health:
+      show-details: ALWAYS

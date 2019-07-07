@@ -1,0 +1,17 @@
+server:
+  port: 5011
+
+spring:
+  application:
+    name: eureka
+
+eureka:
+  instance:
+    hostname: eureka-5011
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 30
+  client:
+    service-url:
+      defaultZone: http://localhost:5011/eureka/
+    register-with-eureka: false
+    fetch-registry: false

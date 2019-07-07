@@ -1,0 +1,88 @@
+# 谨慎改动
+image: maven:3.5.2-jdk-8
+variables:
+stages:
+- compile
+- package
+- deploy
+before_script:
+- echo '开始构建开始构建...'
+cache:
+  key: ${CI_BUILD_STAGE}
+  paths:
+  - /cache/local/repo/
+# 编译&测试
+build:
+  stage: compile
+  script:
+  - mvn clean compile -U
+  only:
+  - develop
+  when:
+    manual
+  tags:
+  - gateway-dev
+build_release:
+  stage: compile
+  script:
+  - mvn clean compile -U
+  only:
+  - /^release(\d*\_){2,}\d+$/
+  tags:
+  - gateway-dev
+# 打包
+package:
+  stage: package
+  script:
+  - mvn package dockerfile:build && mvn dockerfile:push
+  #- mvn package -pl commonserviceimpl -am && mvn -pl commonserviceimpl dockerfile:build
+  after_script:
+  - echo 'package...'
+  only:
+  - develop
+  tags:
+  - gateway-dev
+  artifacts:
+  #  untracked: false
+  #  name: $CI_PROJECT_NAME
+  #  expire_in: 12 hrs
+  #  paths:
+  #  - commonserviceimpl/target/*.jar
+package_release:
+  stage: package
+  script:
+  - mvn -D image.name=${CI_COMMIT_REF_NAME} package dockerfile:build && mvn dockerfile:push
+  #- mvn package -pl commonserviceimpl -am && mvn -pl commonserviceimpl dockerfile:build
+  after_script:
+  - echo 'package...'
+  only:
+  - /^release(\d*\_){2,}\d+$/
+  tags:
+  - gateway-dev
+  artifacts:
+  #  untracked: false
+  #  name: $CI_PROJECT_NAME
+  #  expire_in: 12 hrs
+  #  paths:
+  #  - commonserviceimpl/target/*.jar
+after_script:
+- echo '结束构建...'
+deploy-prod:
+  stage: deploy
+  script:
+  - sshpass -p dianjue@1016 ssh -o StrictHostKeyChecking=no root@192.168.1.215 "sudo docker pull mq1.dj.com:8052/gateway:$CI_COMMIT_REF_NAME && sudo docker tag mq1.dj.com:8052/gateway:$CI_COMMIT_REF_NAME registry.cn-shanghai.aliyuncs.com/dianjue/gateway:$CI_COMMIT_REF_NAME && sudo docker push registry.cn-shanghai.aliyuncs.com/dianjue/gateway:$CI_COMMIT_REF_NAME"
+  #- sshpass -p dianjue@1016 ssh -o StrictHostKeyChecking=no centos@192.168.1.72 'sudo docker stop demoserviceimpl-1951;sudo docker stop demoserviceimpl-1951;sudo docker run --name demoserviceimpl-1951 -d -p 1951:1951 -e ACTIVE=" -Xms128m -Xmx456m --eureka.instance.ip-address=192.168.1.72 --eureka.client.service-url.defaultZone=http://192.168.1.78:1001/eureka/,http://192.168.1.78:1002/eureka/,http://192.168.1.78:1003/eureka/" mq.dj.com:8052/demoserviceimpl'
+  #  - mvn dockerfile:push
+  only:
+  - /^release(\d*\_){2,}\d+$/
+  tags:
+  - gateway
+  when:
+    manual
+  before_script:
+  - RUN mv /etc/apt/sources.list /etc/apt/sources.list.bak && \
+    echo "deb http://mirrors.163.com/debian/ jessie main non-free contrib" >/etc/apt/sources.list && \
+    echo "deb http://mirrors.163.com/debian/ jessie-proposed-updates main non-free contrib" >>/etc/apt/sources.list && \
+    echo "deb-src http://mirrors.163.com/debian/ jessie main non-free contrib" >>/etc/apt/sources.list && \
+    echo "deb-src http://mirrors.163.com/debian/ jessie-proposed-updates main non-free contrib" >>/etc/apt/sources.list
+  - apt-get update && apt-get install sshpass
