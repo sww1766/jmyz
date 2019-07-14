@@ -24,6 +24,7 @@ public class FileServiceImpl extends ServiceImpl<FilesMapper, Files> implements 
         return filesMapper.insert(files);
     }
 
+    @Override
     public String getFileNameById(String fileId) {
         return Objects.requireNonNull(filesMapper.selectById(fileId)).getFileName();
     }

@@ -66,3 +66,13 @@ ribbon:
 
 logging:
   config: classpath:logback-spring.xml
+
+rocketmq:
+  nameServer: 192.168.1.10:9876
+  producer:
+    group: my-group1
+    send-message-timeout: 300000
+
+demo:
+  rocketmq:
+    topic: string-topic
